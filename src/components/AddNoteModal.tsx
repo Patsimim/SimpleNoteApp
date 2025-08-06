@@ -7,10 +7,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../store";
 import { addNote, Note, updateNote } from "../store/notesSlice";
 import { buttonStyles, buttonTextStyles } from "../styles/buttons";
-import { colors } from "../styles/colors";
+import { colors, darkColors } from "../styles/colors";
 import { globalStyles, textStyles } from "../styles/globalStyles";
 import { inputStyles } from "../styles/input";
 
@@ -28,6 +29,9 @@ const AddNoteModal: React.FC<AddNoteModalProps> = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const dispatch = useDispatch();
+  const { isDarkMode } = useSelector((state: RootState) => state.notes);
+
+  const currentColors = isDarkMode ? darkColors : colors;
 
   useEffect(() => {
     if (editNote) {
@@ -71,13 +75,37 @@ const AddNoteModal: React.FC<AddNoteModalProps> = ({
     onClose();
   };
 
+  const dynamicStyles = {
+    modalContent: {
+      ...globalStyles.modalContent,
+      backgroundColor: currentColors.white,
+    },
+    title: {
+      ...textStyles.title,
+      color: currentColors.text,
+    },
+    input: {
+      ...inputStyles.base,
+      backgroundColor: currentColors.white,
+      borderColor: currentColors.border,
+      color: currentColors.text,
+    },
+    multilineInput: {
+      ...inputStyles.base,
+      ...inputStyles.multiline,
+      backgroundColor: currentColors.white,
+      borderColor: currentColors.border,
+      color: currentColors.text,
+    },
+  };
+
   return (
     <Modal visible={visible} animationType='slide' transparent>
       <View style={globalStyles.modalOverlay}>
-        <View style={globalStyles.modalContent}>
+        <View style={dynamicStyles.modalContent}>
           <Text
             style={[
-              textStyles.title,
+              dynamicStyles.title,
               globalStyles.textCenter,
               globalStyles.marginBottom,
             ]}
@@ -86,21 +114,21 @@ const AddNoteModal: React.FC<AddNoteModalProps> = ({
           </Text>
 
           <TextInput
-            style={inputStyles.base}
+            style={dynamicStyles.input}
             placeholder='Note title'
             value={title}
             onChangeText={setTitle}
             autoFocus
-            placeholderTextColor={colors.textLight}
+            placeholderTextColor={currentColors.textLight}
           />
 
           <TextInput
-            style={[inputStyles.base, inputStyles.multiline]}
+            style={dynamicStyles.multilineInput}
             placeholder='Note description'
             value={description}
             onChangeText={setDescription}
             multiline
-            placeholderTextColor={colors.textLight}
+            placeholderTextColor={currentColors.textLight}
           />
 
           <View style={[globalStyles.row, { gap: 12, marginTop: 16 }]}>

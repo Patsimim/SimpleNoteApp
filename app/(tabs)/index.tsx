@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import {
   FlatList,
   SafeAreaView,
+  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -14,9 +15,9 @@ import EmptyState from "../../src/components/Empty";
 import NoteItem from "../../src/components/NoteItem";
 import { RootState } from "../../src/store";
 import { logout } from "../../src/store/authSlice";
-import { setSearchQuery } from "../../src/store/notesSlice";
+import { setSearchQuery, toggleTheme } from "../../src/store/notesSlice";
 import { buttonStyles, buttonTextStyles } from "../../src/styles/buttons";
-import { colors } from "../../src/styles/colors";
+import { colors, darkColors } from "../../src/styles/colors";
 import { globalStyles, textStyles } from "../../src/styles/globalStyles";
 import { inputStyles } from "../../src/styles/input";
 import { spacing } from "../../src/styles/spacing";
@@ -24,7 +25,12 @@ import { spacing } from "../../src/styles/spacing";
 export default function NotesScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const dispatch = useDispatch();
-  const { notes, searchQuery } = useSelector((state: RootState) => state.notes);
+  const { notes, searchQuery, isDarkMode } = useSelector(
+    (state: RootState) => state.notes
+  );
+
+  // Get current theme colors
+  const currentColors = isDarkMode ? darkColors : colors;
 
   const filteredNotes = notes.filter(
     (note) =>
@@ -41,24 +47,89 @@ export default function NotesScreen() {
     dispatch(setSearchQuery(text));
   };
 
+  const handleThemeToggle = () => {
+    dispatch(toggleTheme());
+  };
+
+  const dynamicStyles = {
+    container: {
+      ...globalStyles.container,
+      backgroundColor: currentColors.background,
+    },
+    header: {
+      ...globalStyles.header,
+      backgroundColor: currentColors.white,
+      borderBottomColor: currentColors.border,
+    },
+    card: {
+      ...globalStyles.card,
+      backgroundColor: currentColors.white,
+    },
+    listItem: {
+      ...globalStyles.listItem,
+      backgroundColor: currentColors.white,
+    },
+    modalContent: {
+      ...globalStyles.modalContent,
+      backgroundColor: currentColors.white,
+    },
+    title: {
+      ...textStyles.title,
+      color: currentColors.text,
+    },
+    input: {
+      ...inputStyles.base,
+      backgroundColor: currentColors.white,
+      borderColor: currentColors.border,
+      color: currentColors.text,
+    },
+  };
+
   return (
-    <SafeAreaView style={globalStyles.container}>
-      <View style={globalStyles.header}>
-        <Text style={textStyles.title}>My Notes</Text>
-        <TouchableOpacity
-          style={[buttonStyles.base, buttonStyles.danger, buttonStyles.small]}
-          onPress={handleLogout}
+    <SafeAreaView style={dynamicStyles.container}>
+      <View style={dynamicStyles.header}>
+        <Text style={dynamicStyles.title}>My Notes</Text>
+        <View
+          style={[globalStyles.row, { alignItems: "center", gap: spacing.md }]}
         >
-          <Text
+          <View
             style={[
-              buttonTextStyles.base,
-              buttonTextStyles.danger,
-              buttonTextStyles.small,
+              globalStyles.row,
+              { alignItems: "center", gap: spacing.sm },
             ]}
           >
-            Logout
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={[textStyles.small, { color: currentColors.textLight }]}
+            >
+              {isDarkMode ? "🌙" : "☀️"}
+            </Text>
+            <Switch
+              value={isDarkMode}
+              onValueChange={handleThemeToggle}
+              trackColor={{
+                false: currentColors.border,
+                true: currentColors.primary,
+              }}
+              thumbColor={
+                isDarkMode ? currentColors.white : currentColors.lightGray
+              }
+            />
+          </View>
+          <TouchableOpacity
+            style={[buttonStyles.base, buttonStyles.danger, buttonStyles.small]}
+            onPress={handleLogout}
+          >
+            <Text
+              style={[
+                buttonTextStyles.base,
+                buttonTextStyles.danger,
+                buttonTextStyles.small,
+              ]}
+            >
+              Logout
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View
@@ -69,11 +140,11 @@ export default function NotesScreen() {
         ]}
       >
         <TextInput
-          style={[inputStyles.base, inputStyles.base, globalStyles.flex1]}
+          style={[dynamicStyles.input, globalStyles.flex1]}
           placeholder='Search notes...'
           value={searchQuery}
           onChangeText={handleSearch}
-          placeholderTextColor={colors.textLight}
+          placeholderTextColor={currentColors.textLight}
         />
         <TouchableOpacity
           style={[buttonStyles.base, buttonStyles.primary, buttonStyles.round]}
@@ -98,7 +169,7 @@ export default function NotesScreen() {
           data={filteredNotes}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <NoteItem note={item} />}
-          contentContainerStyle={globalStyles.listItem}
+          contentContainerStyle={dynamicStyles.listItem}
         />
       )}
 

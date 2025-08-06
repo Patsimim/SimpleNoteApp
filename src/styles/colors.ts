@@ -17,3 +17,23 @@ export const colors = {
 
   border: "#C7C7CC",
 };
+
+export const darkColors = {
+  primary: "#0A84FF",
+  danger: "#FF453A",
+  success: "#32D74B",
+
+  white: "#1C1C1E",
+  black: "#FFFFFF",
+  lightGray: "#2C2C2E",
+  gray: "#8E8E93",
+  darkGray: "#F2F2F7",
+
+  text: "#FFFFFF",
+  textSecondary: "#EBEBF5",
+  textLight: "#8E8E93",
+
+  background: "#000000",
+
+  border: "#38383A",
+};

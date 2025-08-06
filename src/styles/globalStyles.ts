@@ -139,3 +139,47 @@ export const textStyles = StyleSheet.create({
     color: colors.danger,
   },
 });
+
+export const createThemedStyles = (currentColors: typeof colors) => ({
+  container: {
+    ...globalStyles.container,
+    backgroundColor: currentColors.background,
+  },
+  header: {
+    ...globalStyles.header,
+    backgroundColor: currentColors.white,
+    borderBottomColor: currentColors.border,
+  },
+  card: {
+    ...globalStyles.card,
+    backgroundColor: currentColors.white,
+  },
+  listItem: {
+    ...globalStyles.listItem,
+    backgroundColor: currentColors.white,
+  },
+  modalContent: {
+    ...globalStyles.modalContent,
+    backgroundColor: currentColors.white,
+  },
+  title: {
+    ...textStyles.title,
+    color: currentColors.text,
+  },
+  heading: {
+    ...textStyles.heading,
+    color: currentColors.text,
+  },
+  body: {
+    ...textStyles.body,
+    color: currentColors.text,
+  },
+  bodySecondary: {
+    ...textStyles.bodySecondary,
+    color: currentColors.textSecondary,
+  },
+  small: {
+    ...textStyles.small,
+    color: currentColors.textLight,
+  },
+});

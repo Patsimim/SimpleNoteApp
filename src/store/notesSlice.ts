@@ -10,11 +10,13 @@ interface Note {
 interface NotesState {
   notes: Note[];
   searchQuery: string;
+  isDarkMode: boolean;
 }
 
 const initialState: NotesState = {
   notes: [],
   searchQuery: "",
+  isDarkMode: false,
 };
 
 const notesSlice = createSlice({
@@ -49,10 +51,13 @@ const notesSlice = createSlice({
     setSearchQuery: (state, action: PayloadAction<string>) => {
       state.searchQuery = action.payload;
     },
+    toggleTheme: (state) => {
+      state.isDarkMode = !state.isDarkMode;
+    },
   },
 });
 
-export const { addNote, updateNote, deleteNote, setSearchQuery } =
+export const { addNote, updateNote, deleteNote, setSearchQuery, toggleTheme } =
   notesSlice.actions;
 export default notesSlice.reducer;
 export type { Note };
