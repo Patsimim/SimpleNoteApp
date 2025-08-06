@@ -1,75 +1,111 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+  FlatList,
+  SafeAreaView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import AddNoteModal from "../../src/components/AddNoteModal";
+import EmptyState from "../../src/components/Empty";
+import NoteItem from "../../src/components/NoteItem";
+import { RootState } from "../../src/store";
+import { logout } from "../../src/store/authSlice";
+import { setSearchQuery } from "../../src/store/notesSlice";
+import { buttonStyles, buttonTextStyles } from "../../src/styles/buttons";
+import { colors } from "../../src/styles/colors";
+import { globalStyles, textStyles } from "../../src/styles/globalStyles";
+import { inputStyles } from "../../src/styles/input";
+import { spacing } from "../../src/styles/spacing";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+export default function NotesScreen() {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const dispatch = useDispatch();
+  const { notes, searchQuery } = useSelector((state: RootState) => state.notes);
 
-export default function HomeScreen() {
+  const filteredNotes = notes.filter(
+    (note) =>
+      note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      note.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleLogout = () => {
+    dispatch(logout());
+    router.replace("/(auth)/login" as any);
+  };
+
+  const handleSearch = (text: string) => {
+    dispatch(setSearchQuery(text));
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <SafeAreaView style={globalStyles.container}>
+      <View style={globalStyles.header}>
+        <Text style={textStyles.title}>My Notes</Text>
+        <TouchableOpacity
+          style={[buttonStyles.base, buttonStyles.danger, buttonStyles.small]}
+          onPress={handleLogout}
+        >
+          <Text
+            style={[
+              buttonTextStyles.base,
+              buttonTextStyles.danger,
+              buttonTextStyles.small,
+            ]}
+          >
+            Logout
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View
+        style={[
+          globalStyles.row,
+          globalStyles.paddingHorizontal,
+          { gap: spacing.md, paddingVertical: spacing.lg },
+        ]}
+      >
+        <TextInput
+          style={[inputStyles.base, inputStyles.base, globalStyles.flex1]}
+          placeholder='Search notes...'
+          value={searchQuery}
+          onChangeText={handleSearch}
+          placeholderTextColor={colors.textLight}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <TouchableOpacity
+          style={[buttonStyles.base, buttonStyles.primary, buttonStyles.round]}
+          onPress={() => setIsModalVisible(true)}
+        >
+          <Text
+            style={[
+              buttonTextStyles.base,
+              buttonTextStyles.primary,
+              { fontSize: 24 },
+            ]}
+          >
+            +
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {filteredNotes.length === 0 ? (
+        <EmptyState onAddNote={() => setIsModalVisible(true)} />
+      ) : (
+        <FlatList
+          data={filteredNotes}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <NoteItem note={item} />}
+          contentContainerStyle={globalStyles.listItem}
+        />
+      )}
+
+      <AddNoteModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+      />
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
